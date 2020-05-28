@@ -1,0 +1,107 @@
+-- This script is to generate aggregation tables 
+-- Put this script in crontab to run periodically 
+
+-- This table is to get the user with most tweets count about Coronavirus
+DROP TABLE IF EXISTS mvp_user;
+
+CREATE TABLE IF NOT EXISTS mvp_user(
+  userName string,
+  location string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE mvp_user
+ SELECT username, location, count(tweetid) as countTweets
+ FROM test.Twitter
+ GROUP BY username, location
+ order by countTweets Desc
+ limit 1
+;
+
+-- This table is to get the country with most tweets count about Coronavirus
+DROP TABLE IF EXISTS mvp_location ;
+
+CREATE TABLE IF NOT EXISTS mvp_location(
+  location string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE mvp_location
+ SELECT location, count(tweetId) as countTweets
+ FROM test.Twitter
+ GROUP BY location
+ order by countTweets Desc
+ limit 1
+;
+
+-- This table is to get the top 10 country wrote about Coronavirus
+DROP TABLE IF EXISTS topLocations;
+
+CREATE TABLE IF NOT EXISTS topLocations(
+  country string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE topLocations
+ SELECT location, count(tweetid) as countTweets
+ FROM test.Twitter
+ GROUP BY location
+ Order by  countTweets Desc
+ limit 10;
+
+-- This table is to get the top 20 verified accounts wrote about Coronavirus
+DROP TABLE IF EXISTS top_verified_accounts;
+
+CREATE TABLE IF NOT EXISTS top_verified_accounts(
+  userName string,
+  country string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE top_verified_accounts
+ SELECT username, location, count(tweetid) as countTweets
+ FROM test.Twitter
+ where verified = true
+ GROUP BY username , location
+ Order by  countTweets Desc
+ limit 20;
+
+-- This table is to get the top user wrote about Coronavirus in each country
+DROP TABLE IF EXISTS mvp_user_perCountry;
+
+CREATE TABLE IF NOT EXISTS mvp_user_perCountry(
+  userName string,
+  country string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE mvp_user_perCountry
+ SELECT first_value(userName) over(partition by location order by count(tweetId) Desc),location, count(tweetId) as countTweets
+ FROM test.Twitter
+ GROUP BY userName , location
+ Order by  countTweets Desc ;
+
+-- This table is to get the total tweets count per each country
+DROP TABLE IF EXISTS TotalTweetsPerLocations;
+CREATE TABLE IF NOT EXISTS TotalTweetsPerLocations(
+  country string,
+  coutTweets int
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' stored as textfile ;
+
+ INSERT INTO TABLE TotalTweetsPerLocations
+ SELECT location, count(tweetid) as countTweets
+ FROM test.Twitter
+ GROUP BY location
+ Order by  countTweets Desc;

@@ -1,0 +1,8 @@
+#create directory on HDFS
+sudo -u hdfs hadoop fs -mkdir -p /user/hive/warehouse/Tweets
+
+#change own of the directory 
+sudo -u hdfs hdfs dfs -chown -R cloudera:hdfs /user/hive/warehouse/Tweets
+
+#create external table on hive
+CREATE EXTERNAL TABLE Twitter (tweet_id BIGINT ,tweet string , language string , user_id BIGINT , user_name string , user_screenName string , user_location string , user_followersCount int , verified boolean , possibly_sensitive boolean, timestamp_ms BIGINT ) STORED AS PARQUET LOCATION '/user/hive/warehouse/test5/';
