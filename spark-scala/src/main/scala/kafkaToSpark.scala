@@ -18,7 +18,7 @@ object kafkaToSpark {
       .format("kafka")
       .option("kafka.bootstrap.servers", "http://quickstart.cloudera:9092")
       .option("subscribe", "Tweets")
-      .option("startingOffsets", "latest") // From starting
+      .option("startingOffsets", "latest") 
       .load()
 
     println("start")
@@ -38,7 +38,7 @@ object kafkaToSpark {
       StructField("timestamp_ms", LongType, true)
     ))
 
-    val df_tweet = df.selectExpr("CAST(value AS STRING)") // First convert binary to string
+    val df_tweet = df.selectExpr("CAST(value AS STRING)") 
       .select(from_json(col("value"), schema).as("data")).select("data.id", "data.text","data.lang"
       ,"data.user_id","data.user_name","data.user_screenName"
       ,"data.user_location","data.user_followersCount"
